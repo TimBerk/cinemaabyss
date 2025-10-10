@@ -1,0 +1,47 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: monolith-service
+    protocol: ${MONOLITH_PROTOCOL}
+    host: ${MONOLITH_HOST}
+    port: ${MONOLITH_PORT}
+    path: /api/users
+    routes:
+      - name: monolith-route
+        paths:
+          - /api/users
+        strip_path: true
+
+  - name: movies-service
+    protocol: ${MOVIES_SERVICE_PROTOCOL}
+    host: ${MOVIES_SERVICE_HOST}
+    port: ${MOVIES_SERVICE_PORT}
+    path: /api/movies
+    routes:
+      - name: movies-route
+        paths:
+          - /api/movies
+        strip_path: true
+
+  - name: events-service
+    protocol: ${EVENTS_SERVICE_PROTOCOL}
+    host: ${EVENTS_SERVICE_HOST}
+    port: ${EVENTS_SERVICE_PORT}
+    path: /api/events
+    routes:
+      - name: events-route
+        paths:
+          - /api/events
+        strip_path: true
+
+routes:
+- name: health
+  paths:
+  - /health
+  plugins:
+  - name: request-termination
+    config:
+     status_code: 200
+     content_type: application/json
+     body: '{"status":"UP"}'

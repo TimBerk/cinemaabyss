@@ -1,0 +1,36 @@
+[project]
+name = "events"
+version = "0.1.0"
+description = "Async app for work with events"
+requires-python = "==3.12.11"
+
+dependencies = [
+    "asyncio>=4.0.0",
+    "fastapi[standard]>=0.117.0",
+    "faststream[confluent]>=0.4.0",
+    "pydantic>=2.11.9",
+    "pydantic-settings>=2.10.1",
+    "structlog>=25.4.0",
+    "uvicorn>=0.36.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.13.1",
+    "setuptools>=80.9.0",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "C", "I", "W"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+docstring-quotes = "single"
