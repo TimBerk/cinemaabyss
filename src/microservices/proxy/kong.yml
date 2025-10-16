@@ -2,28 +2,6 @@ _format_version: "3.0"
 _transform: true
 
 services:
-  - name: monolith-service
-    protocol: ${MONOLITH_PROTOCOL}
-    host: ${MONOLITH_HOST}
-    port: ${MONOLITH_PORT}
-    path: /api/users
-    routes:
-      - name: monolith-route
-        paths:
-          - /api/users
-        strip_path: true
-
-  - name: movies-service
-    protocol: ${MOVIES_SERVICE_PROTOCOL}
-    host: ${MOVIES_SERVICE_HOST}
-    port: ${MOVIES_SERVICE_PORT}
-    path: /api/movies
-    routes:
-      - name: movies-route
-        paths:
-          - /api/movies
-        strip_path: true
-
   - name: events-service
     protocol: ${EVENTS_SERVICE_PROTOCOL}
     host: ${EVENTS_SERVICE_HOST}
@@ -35,13 +13,71 @@ services:
           - /api/events
         strip_path: true
 
+  - name: monolith-service
+    protocol: ${MONOLITH_PROTOCOL}
+    host: ${MONOLITH_HOST}
+    port: ${MONOLITH_PORT}
+    routes:
+      - name: users-route
+        paths:
+          - /api/users
+        strip_path: false
+      - name: payments-route
+        paths:
+          - /api/payments
+        strip_path: false
+    plugins:
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Service: monolith"
+              - "X-Service-Type: legacy"
+
+  - name: movies-service
+    protocol: ${MOVIES_SERVICE_PROTOCOL}
+    host: movies-split
+    routes:
+      - name: movies-route
+        paths:
+          - /api/movies
+        strip_path: false
+    plugins:
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - "X-Service: movies-service"
+              - "X-Upstream: movies-split"
+
+upstreams:
+  - name: movies-split
+    algorithm: round-robin
+    healthchecks:
+      passive:
+        healthy:
+          http_statuses: [200, 201, 204]
+          successes: 1
+        unhealthy:
+          http_statuses: [500, 502, 503, 504]
+          tcp_failures: 1
+          timeouts: 1
+          http_failures: 1
+    targets:
+      # Новый сервис (movies v2)
+      - target: ${MOVIES_SERVICE_HOST}:${MOVIES_SERVICE_PORT}
+        weight: ${MOVIES_MIGRATION_PERCENT}
+      # Монолит (v1)
+      - target: ${MONOLITH_HOST}:${MONOLITH_PORT}
+        weight: ${MONOLITH_MIGRATION_PERCENT}
+
 routes:
-- name: health
-  paths:
-  - /health
-  plugins:
-  - name: request-termination
-    config:
-     status_code: 200
-     content_type: application/json
-     body: '{"status":"UP"}'
+  - name: health
+    paths:
+      - /health
+    plugins:
+      - name: request-termination
+        config:
+          status_code: 200
+          content_type: application/json
+          body: '{"status":"UP"}'

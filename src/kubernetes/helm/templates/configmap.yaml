@@ -27,3 +27,4 @@ data:
   # Strangler Fig configuration
   GRADUAL_MIGRATION: {{ .Values.config.gradualMigration | quote }}
   MOVIES_MIGRATION_PERCENT: {{ .Values.config.moviesMigrationPercent | quote }}
+  MONOLITH_MIGRATION_PERCENT: {{ .Values.config.monolithMigrationPercent | quote }}

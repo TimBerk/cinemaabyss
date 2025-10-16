@@ -5,7 +5,7 @@ global:
 
 # Image pull secrets
 imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
+  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6ICJWR2x0UW1WeWF6cG5hSEJmZFd4TGExTmhlbmxaVDNGdVVrODBhVmh0VW1oMFIyeGhTV0YxYWxkU01VZFhTMVJCIgoJCX0KCX0sCgkiY3JlZHNTdG9yZSI6ICJkZXNrdG9wIiwKCSJjdXJyZW50Q29udGV4dCI6ICJkZXNrdG9wLWxpbnV4IiwKCSJwbHVnaW5zIjogewoJCSIteC1jbGktaGludHMiOiB7CgkJCSJlbmFibGVkIjogImZhbHNlIgoJCX0sCgkJImRlYnVnIjogewoJCQkiaG9va3MiOiAiZXhlYyIKCQl9LAoJCSJzY291dCI6IHsKCQkJImhvb2tzIjogInB1bGwsYnVpbGR4IGJ1aWxkIgoJCX0KCX0sCgkiZmVhdHVyZXMiOiB7CgkJImhvb2tzIjogImZhbHNlIgoJfQp9
 # Database configuration
 database:
   host: postgres
@@ -182,4 +182,5 @@ ingress:
 config:
   # Strangler Fig configuration
   gradualMigration: "true"
-  moviesMigrationPercent: "100"
+  moviesMigrationPercent: "50"
+  monolithMigrationPercent: "50"

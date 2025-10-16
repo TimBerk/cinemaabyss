@@ -18,10 +18,10 @@ spec:
                 name: proxy-service
                 port:
                   number: 8000
-          - path: /api/payments
+          - path: /api/events
             pathType: Prefix
             backend:
               service:
-                name: monolith-service
+                name: events-service
                 port:
-                  number: 8080
+                  number: 8082

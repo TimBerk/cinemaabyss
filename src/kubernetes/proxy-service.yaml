@@ -39,6 +39,8 @@ spec:
           value: "off"
         - name: KONG_NGINX_DAEMON
           value: "off"
+        - name: KONG_LOG_LEVEL
+          value: "info"
         envFrom:
         - configMapRef:
             name: cinemaabyss-config

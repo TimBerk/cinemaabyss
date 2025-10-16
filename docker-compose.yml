@@ -125,6 +125,9 @@ services:
     environment:
       KONG_DATABASE: 'off'
       KONG_DECLARATIVE_CONFIG: '/etc/kong/kong.yml'
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_LOG_LEVEL: 'info'
       PORT: 8000
       MONOLITH_PROTOCOL: http
       MONOLITH_HOST: monolith
@@ -136,11 +139,9 @@ services:
       EVENTS_SERVICE_HOST: events-service
       EVENTS_SERVICE_PORT: 8082
       GRADUAL_MIGRATION: "true"
-      MOVIES_MIGRATION_PERCENT: "50"
+      MONOLITH_MIGRATION_PERCENT: 50
+      MOVIES_MIGRATION_PERCENT: 50
 
-      # Важные настройки для доступа
-      KONG_PROXY_LISTEN: 0.0.0.0:8000
-      KONG_ADMIN_LISTEN: 0.0.0.0:8001
     networks:
       - cinemaabyss-network
 

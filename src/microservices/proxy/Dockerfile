@@ -11,7 +11,11 @@ COPY kong.yml /etc/kong/kong.yml.template
 
 RUN chmod +x /entrypoint.sh
 
+# Verify the file exists and has correct permissions
+RUN ls -la /entrypoint.sh && \
+    echo "Entrypoint script check passed"
+
 USER kong
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["kong", "docker-start"]
+CMD ["kong", "start"]

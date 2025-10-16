@@ -1,51 +1,33 @@
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
-  name: movies-circuit-breaker
+  name: httpbin-cb
   namespace: cinemaabyss
 spec:
-  host: movies-service.cinemaabyss.svc.cluster.local
+  host: httpbin.cinemaabyss.svc.cluster.local
   trafficPolicy:
     connectionPool:
       tcp:
-        maxConnections: 100
+        maxConnections: 1
       http:
-        http1MaxPendingRequests: 50
-        maxRequestsPerConnection: 10
-        maxRetries: 3
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
     outlierDetection:
-      consecutive5xxErrors: 5
-      consecutiveGatewayErrors: 5
-      interval: 30s
-      baseEjectionTime: 30s
-      maxEjectionPercent: 50
-  subsets:
-  - name: v1
-    labels:
-      app: movies-servies
+      consecutive5xxErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
 ---
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
+apiVersion: networking.istio.io/v1
+kind: VirtualService
 metadata:
-  name: monolith-circuit-breaker
+  name: httpbin-vs
   namespace: cinemaabyss
 spec:
-  host: monolith-service.cinemaabyss.svc.cluster.local
-  trafficPolicy:
-    connectionPool:
-      tcp:
-        maxConnections: 200
-      http:
-        http1MaxPendingRequests: 100
-        maxRequestsPerConnection: 10
-        maxRetries: 3
-    outlierDetection:
-      consecutive5xxErrors: 5
-      consecutiveGatewayErrors: 5
-      interval: 30s
-      baseEjectionTime: 30s
-      maxEjectionPercent: 50
-  subsets:
-  - name: v1
-    labels:
-      app: monolith-service
+  hosts:
+    - httpbin
+  http:
+    - timeout: 5s
+      route:
+        - destination:
+            host: httpbin.cinemaabyss.svc.cluster.local

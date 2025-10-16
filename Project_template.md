@@ -248,7 +248,7 @@ cat .docker/config.json | base64
   ```
   11. Вызовите https://cinemaabyss.example.com/api/movies
   Вы должны увидеть вывод списка фильмов
-  Можно поэкспериментировать со значением   MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедится, что вызовы movies уходят полностью в новый сервис
+  Можно поэкспериментировать со значением MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедится, что вызовы movies уходят полностью в новый сервис
 
   12. Запустите тесты из папки tests/postman
   ```bash
@@ -410,34 +410,34 @@ cluster.outbound|8081||movies-service.cinemaabyss.svc.cluster.local;.upstream_rq
 You can see 21 for the upstream_rq_pending_overflow value which means 21 calls so far have been flagged for circuit breaking.
 ```
 
-Приложите скриншот работы circuit breaker'а:
-```bash
-kubectl exec -n cinemaabyss fortio-deploy-88f4d85d4-hmn2p  -c fortio -- fortio load -c 50 -qps 0 -n 500 -loglevel Warning http://movies-service:8081/api/movies
-{"ts":1760295229.156087,"level":"info","r":1,"file":"logger.go","line":298,"msg":"Log level is now 3 Warning (was 2 Info)"}
-Fortio 1.69.5 running at 0 queries per second, 12->12 procs, for 500 calls: http://movies-service:8081/api/movies
-Starting at max qps with 50 thread(s) [gomax 12] for exactly 500 calls (10 per thread + 0)
-Ended after 18.887679087s : 500 calls. qps=26.472
-Aggregated Function Time : count 500 avg 1.6938158 +/- 1.166 min 0.004861626 max 6.003268085 sum 846.907878
-Error cases : count 9 avg 3.6683354 +/- 1.248 min 3.000562933 max 6.003268085 sum 33.0150186
-Connection time (s) : count 99 avg 0.00035734877 +/- 0.0003748 min 5.44e-05 max 0.001522713 sum 0.035377528
-Sockets used: 99 (for perfect keepalive, would be 50)
-Uniform: false, Jitter: false, Catchup allowed: true
-IP addresses distribution:
-10.105.218.18:8081: 99
-Code  -1 : 9 (1.8 %)
-Code 200 : 491 (98.2 %)
-Response Header Sizes : count 500 avg 158.736 +/- 21.5 min 0 max 162 sum 79368
-Response Body/Total Sizes : count 500 avg 1402.93 +/- 189.9 min 0 max 1429 sum 701465
-All done 500 calls (plus 0 warmup) 1693.816 ms avg, 26.5 qps
-
-# Stats
-cluster.outbound|8081||movies-service.cinemaabyss.svc.cluster.local;.upstream_rq_pending_total: 165
-```
-
 Удаляем все:
 ```bash
 istioctl uninstall --purge
 kubectl delete namespace istio-system
 kubectl delete all --all -n cinemaabyss
 kubectl delete namespace cinemaabyss
+```
+
+**Вывод работы circuit breaker'а:**
+```bash
+kubectl exec -n cinemaabyss fortio-deploy-5c948d95cf-2jkxm -c fortio -- fortio load -c 50 -qps 0 -n 500 -loglevel Warning http://movies-service:8081/api/movies
+Fortio 1.69.5 running at 0 queries per second, 12->12 procs, for 500 calls: http://movies-service:8081/api/movies
+Starting at max qps with 50 thread(s) [gomax 12] for exactly 500 calls (10 per thread + 0)
+Ended after 17.359670248s : 500 calls. qps=28.802
+Aggregated Function Time : count 500 avg 1.5933873 +/- 1.017 min 0.002355098 max 6.002253192 sum 796.693669
+Error cases : count 5 avg 4.2015708 +/- 1.47 min 3.000831436 max 6.002253192 sum 21.0078538
+Connection time (s) : count 83 avg 0.00046680399 +/- 0.0006035 min 5.9202e-05 max 0.003686354 sum 0.038744731
+Sockets used: 83 (for perfect keepalive, would be 50)
+Uniform: false, Jitter: false, Catchup allowed: true
+IP addresses distribution:
+10.99.238.157:8081: 83
+Code  -1 : 5 (1.0 %)
+Code 200 : 495 (99.0 %)
+Response Header Sizes : count 500 avg 160.048 +/- 16.1 min 0 max 162 sum 80024
+Response Body/Total Sizes : count 500 avg 1709.398 +/- 171.8 min 0 max 1727 sum 854699
+All done 500 calls (plus 0 warmup) 1593.387 ms avg, 28.8 qps
+
+# Stats
+$ kubectl exec -n cinemaabyss fortio-deploy-5c948d95cf-2jkxm -c istio-proxy -- pilot-agent request GET stats | grep movies-service | grep pending
+cluster.outbound|8081||movies-service.cinemaabyss.svc.cluster.local;.upstream_rq_pending_total: 151
 ```

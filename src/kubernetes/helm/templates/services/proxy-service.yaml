@@ -42,6 +42,8 @@ spec:
           value: "off"
         - name: KONG_NGINX_DAEMON
           value: "off"
+        - name: KONG_LOG_LEVEL
+          value: "info"
         envFrom:
           - configMapRef:
               name: cinemaabyss-config
@@ -63,8 +65,7 @@ spec:
   selector:
     app: proxy-service
   ports:
-    - name: http
-      port: {{ .Values.proxyService.service.port }}
+    - port: {{ .Values.proxyService.service.port }}
       targetPort: {{ .Values.proxyService.service.targetPort }}
   type: {{ .Values.proxyService.service.type }}
 {{- end }}
