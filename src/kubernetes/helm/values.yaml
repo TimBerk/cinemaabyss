@@ -5,7 +5,7 @@ global:
 
 # Image pull secrets
 imagePullSecrets:
-  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6
+  dockerconfigjson: ewoJImF1dGhzIjogewoJCSJnaGNyLmlvIjogewoJCQkiYXV0aCI6ICJWR2x0UW1WeWF6cG5hSEJmZFd4TGExTmhlbmxaVDNGdVVrODBhVmh0VW1oMFIyeGhTV0YxYWxkU01VZFhTMVJCIgoJCX0KCX0sCgkiY3JlZHNTdG9yZSI6ICJkZXNrdG9wIiwKCSJjdXJyZW50Q29udGV4dCI6ICJkZXNrdG9wLWxpbnV4IiwKCSJwbHVnaW5zIjogewoJCSIteC1jbGktaGludHMiOiB7CgkJCSJlbmFibGVkIjogImZhbHNlIgoJCX0sCgkJImRlYnVnIjogewoJCQkiaG9va3MiOiAiZXhlYyIKCQl9LAoJCSJzY291dCI6IHsKCQkJImhvb2tzIjogInB1bGwsYnVpbGR4IGJ1aWxkIgoJCX0KCX0sCgkiZmVhdHVyZXMiOiB7CgkJImhvb2tzIjogImZhbHNlIgoJfQp9
 # Database configuration
 database:
   host: postgres
@@ -30,10 +30,10 @@ database:
     accessMode: ReadWriteOnce
 
 # Monolith configuration
-monolith:
+monolithService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/monolith
+    repository: ghcr.io/timberk/cinemaabyss/monolith
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -53,17 +53,17 @@ monolith:
 proxyService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/proxy-service
+    repository: ghcr.io/timberk/cinemaabyss/proxy-service
     tag: latest
     pullPolicy: Always
   replicas: 1
   resources:
     limits:
-      cpu: 300m
-      memory: 256Mi
+      cpu: 1000m
+      memory: 4Gi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 500m
+      memory: 2Gi
   service:
     port: 80
     targetPort: 8000
@@ -73,7 +73,7 @@ proxyService:
 moviesService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/movies-service
+    repository: ghcr.io/timberk/cinemaabyss/movies-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -93,7 +93,7 @@ moviesService:
 eventsService:
   enabled: true
   image:
-    repository: ghcr.io/db-exp/cinemaabysstest/events-service
+    repository: ghcr.io/timberk/cinemaabyss/events-service
     tag: latest
     pullPolicy: Always
   replicas: 1
@@ -182,4 +182,5 @@ ingress:
 config:
   # Strangler Fig configuration
   gradualMigration: "true"
-  moviesMigrationPercent: "100"
+  moviesMigrationPercent: "50"
+  monolithMigrationPercent: "50"

@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monolith
+  name: monolith-service
   namespace: cinemaabyss
   labels:
-    app: monolith
+    app: monolith-service
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: monolith
+      app: monolith-service
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -18,11 +18,11 @@ spec:
   template:
     metadata:
       labels:
-        app: monolith
+        app: monolith-service
     spec:
       containers:
-      - name: monolith
-        image:  ghcr.io/db-exp/cinemaabysstest/monolith:latest
+      - name: monolith-service
+        image:  ghcr.io/timberk/cinemaabyss/monolith:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -62,11 +62,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: monolith
+  name: monolith-service
   namespace: cinemaabyss
 spec:
   selector:
-    app: monolith
+    app: monolith-service
   ports:
   - port: 8080
     targetPort: 8080

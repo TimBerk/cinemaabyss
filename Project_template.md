@@ -2,10 +2,10 @@
 
 ## Задание 1
 
-1. Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
+Спроектируйте to be архитектуру КиноБездны, разделив всю систему на отдельные домены и организовав интеграционное взаимодействие и единую точку вызова сервисов.
 Результат представьте в виде контейнерной диаграммы в нотации С4.
-Добавьте ссылку на файл в этот шаблон
-[ссылка на файл](ссылка)
+
+<img src="info/schemas/container.svg">
 
 
 ## Задание 2
@@ -115,6 +115,7 @@ jobs:
 
 #### Шаг 1
 Для деплоя в kubernetes необходимо залогиниться в docker registry Github'а.
+
 1. Создайте Personal Access Token (PAT) https://github.com/settings/tokens . Создавайте class с правом read:packages
 2. В src/kubernetes/*.yaml (event-service, monolith, movies-service и proxy-service)  отредактируйте путь до ваших образов 
 ```bash
@@ -127,38 +128,29 @@ jobs:
 ```bash
  .dockerconfigjson: значение в base64 файла ~/.docker/config.json
 ```
-
 4. Если в ~/.docker/config.json нет значения для аутентификации
 ```json
 {
-        "auths": {
-                "ghcr.io": {
-                       тут пусто
-                }
+    "auths": {
+        "ghcr.io": {
+               /тут пусто
         }
+    }
 }
 ```
-то выполните 
-
-и добавьте
-
+то выполните и добавьте
 ```json 
- "auth": "имя пользователя:токен в base64"
+{"auth": "имя пользователя:токен в base64"}
 ```
-
 Чтобы получить значение в base64 можно выполнить команду
 ```bash
  echo -n ваш_логин:ваш_токен | base64
 ```
-
 После заполнения config.json, также прогоните содержимое через base64
-
 ```bash
 cat .docker/config.json | base64
 ```
-
 и полученное значение добавляем в
-
 ```bash
  .dockerconfigjson: значение в base64 файла ~/.docker/config.json
 ```
@@ -169,7 +161,7 @@ cat .docker/config.json | base64
 
   - Необходимо создать Deployment и Service 
   - Доработайте ingress.yaml, чтобы можно было с помощью тестов проверить создание событий
-  - Выполните дальшейшие шаги для поднятия кластера:
+  - Выполните дальнейшие шаги для поднятия кластера:
 
   1. Создайте namespace:
   ```bash
@@ -182,31 +174,27 @@ cat .docker/config.json | base64
   kubectl apply -f src/kubernetes/dockerconfigsecret.yaml
   kubectl apply -f src/kubernetes/postgres-init-configmap.yaml
   ```
-
   3. Разверните базу данных:
   ```bash
   kubectl apply -f src/kubernetes/postgres.yaml
   ```
-
-  На этом этапе если вызвать команду
+  На этом этапе если вызвать команду:
   ```bash
   kubectl -n cinemaabyss get pod
   ```
   Вы увидите
-
+  ```bash
   NAME         READY   STATUS    
   postgres-0   1/1     Running   
-
+  ```
   4. Разверните Kafka:
   ```bash
   kubectl apply -f src/kubernetes/kafka/kafka.yaml
   ```
-
   Проверьте, теперь должно быть запущено 3 пода, если что-то не так, то посмотрите логи
   ```bash
   kubectl -n cinemaabyss logs имя_пода (например - kafka-0)
   ```
-
   5. Разверните монолит:
   ```bash
   kubectl apply -f src/kubernetes/monolith.yaml
@@ -220,14 +208,12 @@ cat .docker/config.json | base64
   ```bash
   kubectl apply -f src/kubernetes/proxy-service.yaml
   ```
-
   После запуска и поднятия подов вывод команды 
   ```bash
   kubectl -n cinemaabyss get pod
   ```
-
-  Будет наподобие такого
-
+  Будет наподобие такого:
+  ```bash
   NAME                              READY   STATUS    
 
   events-service-7587c6dfd5-6whzx   1/1     Running  
@@ -243,7 +229,7 @@ cat .docker/config.json | base64
   proxy-service-577d6c549b-6qfcv    1/1     Running  
 
   zookeeper-0                       1/1     Running 
-
+```
   8. Добавим ingress
 
   - добавьте аддон
@@ -262,7 +248,7 @@ cat .docker/config.json | base64
   ```
   11. Вызовите https://cinemaabyss.example.com/api/movies
   Вы должны увидеть вывод списка фильмов
-  Можно поэкспериментировать со значением   MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедится, что вызовы movies уходят полностью в новый сервис
+  Можно поэкспериментировать со значением MOVIES_MIGRATION_PERCENT в src/kubernetes/configmap.yaml и убедится, что вызовы movies уходят полностью в новый сервис
 
   12. Запустите тесты из папки tests/postman
   ```bash
@@ -272,8 +258,11 @@ cat .docker/config.json | base64
   Откройте логи event-service и сделайте скриншот обработки событий
 
 #### Шаг 3
-Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и  скриншот вывода event-service после вызова тестов.
+Добавьте сюда скриншота вывода при вызове https://cinemaabyss.example.com/api/movies и скриншот вывода event-service после вызова тестов.
 
+<img src="info/screens/movies-api.png">
+
+<img src="info/screens/kube-events.png">
 
 ## Задание 4
 Для простоты дальнейшего обновления и развертывания вам как архитектуру необходимо так же реализовать helm-чарты для прокси-сервиса и проверить работу 
@@ -331,7 +320,7 @@ kubectl delete  namespace cinemaabyss
 ```
 Запустите 
 ```bash
-helm install cinemaabyss .\src\kubernetes\helm --namespace cinemaabyss --create-namespace
+helm install cinemaabyss ./src/kubernetes/helm --namespace cinemaabyss --create-namespace
 ```
 Если в процессе будет ошибка
 ```code
@@ -345,9 +334,23 @@ kubectl get pods -n cinemaabyss
 minikube tunnel
 ```
 
-Потом вызовите 
-https://cinemaabyss.example.com/api/movies
-и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies
+Потом вызовите https://cinemaabyss.example.com/api/movies и приложите скриншот развертывания helm и вывода https://cinemaabyss.example.com/api/movies :
+
+Развертывание helm:
+```bash
+$ helm install cinemaabyss ./src/kubernetes/helm --namespace cinemaabyss --create-namespace
+I1012 18:38:56.322789    9960 warnings.go:110] "Warning: unknown field \"spec.app\""
+NAME: cinemaabyss
+LAST DEPLOYED: Sun Oct 12 18:38:55 2025
+NAMESPACE: cinemaabyss
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+```
+
+Вывод API:
+
+<img src="./info/screens/helm-movies-api.png" />
 
 
 # Задание 5
@@ -362,17 +365,16 @@ helm install istio-base istio/base -n istio-system --set defaultRevision=default
 helm install istio-ingressgateway istio/gateway -n istio-system
 helm install istiod istio/istiod -n istio-system --wait
 
-helm install cinemaabyss .\src\kubernetes\helm --namespace cinemaabyss --create-namespace
+helm install cinemaabyss ./src/kubernetes/helm --namespace cinemaabyss --create-namespace
 
 kubectl label namespace cinemaabyss istio-injection=enabled --overwrite
 
 kubectl get namespace -L istio-injection
 
-kubectl apply -f .\src\kubernetes\circuit-breaker-config.yaml -n cinemaabyss
-
+kubectl apply -f ./src/kubernetes/circuit-breaker-config.yaml -n cinemaabyss
 ```
 
-Тестирование
+### Тестирование
 
 # fortio
 ```bash
@@ -386,13 +388,11 @@ FORTIO_POD=$(kubectl get pod -n cinemaabyss | grep fortio | awk '{print $1}')
 kubectl exec -n cinemaabyss $FORTIO_POD -c fortio -- fortio load -c 50 -qps 0 -n 500 -loglevel Warning http://movies-service:8081/api/movies
 ```
 Например,
-
 ```bash
 kubectl exec -n cinemaabyss fortio-deploy-b6757cbbb-7c9qg  -c fortio -- fortio load -c 50 -qps 0 -n 500 -loglevel Warning http://movies-service:8081/api/movies
 ```
 
 Вывод будет типа такого
-
 ```bash
 IP addresses distribution:
 10.106.113.46:8081: 421
@@ -401,24 +401,43 @@ Code 500 : 22 (4.4 %)
 Code 503 : 399 (79.8 %)
 ```
 Можно еще проверить статистику
-
 ```bash
 kubectl exec -n cinemaabyss fortio-deploy-b6757cbbb-7c9qg -c istio-proxy -- pilot-agent request GET stats | grep movies-service | grep pending
 ```
-
-И там смотрим 
-
+И там смотрим:
 ```bash
 cluster.outbound|8081||movies-service.cinemaabyss.svc.cluster.local;.upstream_rq_pending_total: 311 - столько раз срабатывал circuit breaker
 You can see 21 for the upstream_rq_pending_overflow value which means 21 calls so far have been flagged for circuit breaking.
 ```
 
-Приложите скриншот работы circuit breaker'а
-
-Удаляем все
+Удаляем все:
 ```bash
 istioctl uninstall --purge
 kubectl delete namespace istio-system
 kubectl delete all --all -n cinemaabyss
 kubectl delete namespace cinemaabyss
+```
+
+**Вывод работы circuit breaker'а:**
+```bash
+kubectl exec -n cinemaabyss fortio-deploy-5c948d95cf-2jkxm -c fortio -- fortio load -c 50 -qps 0 -n 500 -loglevel Warning http://movies-service:8081/api/movies
+Fortio 1.69.5 running at 0 queries per second, 12->12 procs, for 500 calls: http://movies-service:8081/api/movies
+Starting at max qps with 50 thread(s) [gomax 12] for exactly 500 calls (10 per thread + 0)
+Ended after 17.359670248s : 500 calls. qps=28.802
+Aggregated Function Time : count 500 avg 1.5933873 +/- 1.017 min 0.002355098 max 6.002253192 sum 796.693669
+Error cases : count 5 avg 4.2015708 +/- 1.47 min 3.000831436 max 6.002253192 sum 21.0078538
+Connection time (s) : count 83 avg 0.00046680399 +/- 0.0006035 min 5.9202e-05 max 0.003686354 sum 0.038744731
+Sockets used: 83 (for perfect keepalive, would be 50)
+Uniform: false, Jitter: false, Catchup allowed: true
+IP addresses distribution:
+10.99.238.157:8081: 83
+Code  -1 : 5 (1.0 %)
+Code 200 : 495 (99.0 %)
+Response Header Sizes : count 500 avg 160.048 +/- 16.1 min 0 max 162 sum 80024
+Response Body/Total Sizes : count 500 avg 1709.398 +/- 171.8 min 0 max 1727 sum 854699
+All done 500 calls (plus 0 warmup) 1593.387 ms avg, 28.8 qps
+
+# Stats
+$ kubectl exec -n cinemaabyss fortio-deploy-5c948d95cf-2jkxm -c istio-proxy -- pilot-agent request GET stats | grep movies-service | grep pending
+cluster.outbound|8081||movies-service.cinemaabyss.svc.cluster.local;.upstream_rq_pending_total: 151
 ```

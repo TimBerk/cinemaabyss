@@ -1,5 +1,14 @@
 version: '3.8'
 
+volumes:
+  postgres-data:
+  proxy_db_data:
+
+networks:
+  cinemaabyss-network:
+    name: cinemaabyss-network
+    driver: bridge
+
 services:
   # PostgreSQL Database
   postgres:
@@ -94,8 +103,9 @@ services:
     ports:
       - "8082:8082"
     environment:
-      PORT: 8082
-      KAFKA_BROKERS: kafka:9092
+      APP_PORT: 8082
+      KAFKA_HOST: kafka
+      KAFKA_PORT: 9092
     networks:
       - cinemaabyss-network
 
@@ -111,13 +121,27 @@ services:
       - events-service
     ports:
       - "8000:8000"
+      - "8001:8001"
     environment:
+      KONG_DATABASE: 'off'
+      KONG_DECLARATIVE_CONFIG: '/etc/kong/kong.yml'
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_LOG_LEVEL: 'info'
       PORT: 8000
-      MONOLITH_URL: http://monolith:8080
-      MOVIES_SERVICE_URL: http://movies-service:8081
-      EVENTS_SERVICE_URL: http://events-service:8082
+      MONOLITH_PROTOCOL: http
+      MONOLITH_HOST: monolith
+      MONOLITH_PORT: 8080
+      MOVIES_SERVICE_PROTOCOL: http
+      MOVIES_SERVICE_HOST: movies-service
+      MOVIES_SERVICE_PORT: 8081
+      EVENTS_SERVICE_PROTOCOL: http
+      EVENTS_SERVICE_HOST: events-service
+      EVENTS_SERVICE_PORT: 8082
       GRADUAL_MIGRATION: "true"
-      MOVIES_MIGRATION_PERCENT: "50"
+      MONOLITH_MIGRATION_PERCENT: 50
+      MOVIES_MIGRATION_PERCENT: 50
+
     networks:
       - cinemaabyss-network
 
@@ -135,11 +159,3 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     networks:
       - cinemaabyss-network
-
-volumes:
-  postgres-data:
-
-networks:
-  cinemaabyss-network:
-    name: cinemaabyss-network
-    driver: bridge

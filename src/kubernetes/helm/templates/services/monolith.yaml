@@ -1,18 +1,18 @@
-{{- if .Values.monolith.enabled }}
+{{- if .Values.monolithService.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: monolith
+  name: monolith-service
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: monolith
+    app: monolith-service
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.monolith.replicas }}
+  replicas: {{ .Values.monolithService.replicas }}
   selector:
     matchLabels:
-      app: monolith
+      app: monolith-service
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,17 +21,17 @@ spec:
   template:
     metadata:
       labels:
-        app: monolith
+        app: monolith-service
     spec:
       containers:
-      - name: monolith
-        image: {{ .Values.monolith.image.repository }}:{{ .Values.monolith.image.tag }}
-        imagePullPolicy: {{ .Values.monolith.image.pullPolicy }}
+      - name: monolith-service
+        image: {{ .Values.monolithService.image.repository }}:{{ .Values.monolithService.image.tag }}
+        imagePullPolicy: {{ .Values.monolithService.image.pullPolicy }}
         ports:
-        - containerPort: {{ .Values.monolith.service.targetPort }}
+        - containerPort: {{ .Values.monolithService.service.targetPort }}
         env:
         - name: PORT
-          value: "{{ .Values.monolith.service.targetPort }}"
+          value: "{{ .Values.monolithService.service.targetPort }}"
         - name: DB_CONNECTION_STRING
           value: "postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
         envFrom:
@@ -40,17 +40,17 @@ spec:
         - secretRef:
             name: cinemaabyss-secrets
         resources:
-          {{- toYaml .Values.monolith.resources | nindent 10 }}
+          {{- toYaml .Values.monolithService.resources | nindent 10 }}
         readinessProbe:
           httpGet:
             path: /api/users
-            port: {{ .Values.monolith.service.targetPort }}
+            port: {{ .Values.monolithService.service.targetPort }}
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           httpGet:
             path: /api/users
-            port: {{ .Values.monolith.service.targetPort }}
+            port: {{ .Values.monolithService.service.targetPort }}
           initialDelaySeconds: 15
           periodSeconds: 20
       restartPolicy: Always
@@ -60,17 +60,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: monolith
+  name: monolith-service
   namespace: {{ .Values.global.namespace }}
   labels:
-    app: monolith
+    app: monolith-service
     app.kubernetes.io/name: {{ include "cinemaabyss.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   selector:
-    app: monolith
+    app: monolith-service
   ports:
-  - port: {{ .Values.monolith.service.port }}
-    targetPort: {{ .Values.monolith.service.targetPort }}
-  type: {{ .Values.monolith.service.type }}
+  - port: {{ .Values.monolithService.service.port }}
+    targetPort: {{ .Values.monolithService.service.targetPort }}
+  type: {{ .Values.monolithService.service.type }}
 {{- end }}
